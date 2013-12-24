@@ -6,6 +6,9 @@ package com.ayansh.pnrprediction;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import com.ayansh.pnrprediction.exception.ClassNotSupportedException;
+import com.ayansh.pnrprediction.exception.UnKnownDBError;
+
 
 /**
  * @author varun
@@ -42,13 +45,30 @@ public class Main {
 			finish();
 		}
 		
-		if (args.length < 4) {
+		if (args.length != 4) {
 			// Wrong Input !!
 			app.getResultObject().setResultCode(3);
 			app.getResultObject().setMessage("Wrong Input !");
 			finish();
 		}
 		
+		// Input seems to be correct. so we can calculate probability
+		String trainNo = args[0];
+		String travelDate = args[1];
+		String travelClass = args[2];
+		String currentStatus = args[3];
+		
+		try {
+			
+			app.calculateProbability(trainNo, travelDate, travelClass, currentStatus);
+			
+		} catch (SQLException | ClassNotSupportedException | UnKnownDBError e) {
+			
+			app.getResultObject().setResultCode(99);
+			app.getResultObject().setMessage(e.getMessage());
+		}
+		
+		finish();
 	}
 	
 	private static void finish(){
@@ -58,6 +78,8 @@ public class Main {
 		app.close();
 		
 		System.out.println(app.getResultObject().JSONify());
+		
+		System.exit(0);
 		
 	}
 
