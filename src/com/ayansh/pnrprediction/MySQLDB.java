@@ -21,7 +21,7 @@ public class MySQLDB implements DBServer {
 	@Override
 	public void setUpConnection() throws SQLException {
 		
-		mySQL = DriverManager.getConnection(dbURL, "root","");
+		mySQL = DriverManager.getConnection(dbURL, "admin_GUser","PaHxvQ0TJC2L");
 		
 	}
 
@@ -37,6 +37,8 @@ public class MySQLDB implements DBServer {
 	public int getRACQuota(String trainNo, String travelClass)
 			throws SQLException, ClassNotSupportedException, UnKnownDBError {
 
+		int racQuota = 0;
+		
 		if (travelClass.contentEquals("3A") || travelClass.contentEquals("SL")) {
 			// If the Class of travel is 3A or SL then we are good...
 		} else {
@@ -53,7 +55,7 @@ public class MySQLDB implements DBServer {
 		ResultSet result = stmt.executeQuery(sql);
 		
 		if(result.next()){
-			return result.getInt(0);
+			racQuota = result.getInt(1);
 		}
 		else{
 			// Looks like we are not tracking this train !!
@@ -64,13 +66,52 @@ public class MySQLDB implements DBServer {
 			result = stmt.executeQuery(sql);
 			
 			if(result.next()){
-				return result.getInt(0);
+				racQuota = result.getInt(1);
 			}
 			else{
 				throw new UnKnownDBError();
 			}
 		}
-	
+		
+		result.close();
+		return racQuota;
+	}
+
+	@Override
+	public ResultSet getAvailabilityHistory(String trainNo, String travelClass, int dayDiff) throws SQLException, UnKnownDBError {
+		
+		Statement stmt = mySQL.createStatement();
+		
+		String sql = "select t.TrainNo, t.Class, t.TravelDate, sum(l.Cancellations) as Cancellations "
+				+ "from (select distinct TrainNo, Class, TravelDate from AvailabilityInfo where "
+				+ "TrainNo = '" + trainNo + "' and Class = '" + travelClass + "') as t "
+				+ "inner join AvailabilityInfo as l on t.TrainNo = l.TrainNo and t.Class = l.class "
+				+ "and t.TravelDate = l.TravelDate and l.LookupDate >= (t.TravelDate - " + dayDiff + ") "
+				+ "and l.LookupDate < t.TravelDate where t.TrainNo = '" + trainNo + "' "
+				+ "and t.Class = '" + travelClass + "' group by t.TrainNo, t.Class, t.TravelDate";
+
+		ResultSet result = stmt.executeQuery(sql);
+		
+		if(!result.next()){
+			// We did not find anything !!
+			
+			sql = "select t.TrainNo, t.Class, t.TravelDate, sum(l.Cancellations) as Cancellations "
+					+ "from (select distinct TrainNo, Class, TravelDate from AvailabilityInfo where "
+					+ "Class = '" + travelClass + "') as t " 
+					+ "inner join AvailabilityInfo as l on t.TrainNo = l.TrainNo and t.Class = l.class "
+					+ "and t.TravelDate = l.TravelDate and l.LookupDate >= (t.TravelDate - "
+					+ dayDiff + ") " + "and l.LookupDate < t.TravelDate where t.Class = '" 
+					+ travelClass + "' group by t.TrainNo, t.Class, t.TravelDate";
+			
+			result = stmt.executeQuery(sql);
+			
+			if(!result.next()){
+				throw new UnKnownDBError();
+			}
+		}
+		
+		result.beforeFirst();	// Because we called next!
+		return result;
 	}
 
 }
