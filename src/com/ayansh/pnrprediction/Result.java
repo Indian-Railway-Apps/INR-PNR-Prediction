@@ -18,7 +18,7 @@ public class Result {
 
 	private String message;
 	private int resultCode;
-	private String cnfProbability, racProbability;
+	private float cnfProbability, racProbability;
 	private List<String> log;
 	
 	public Result(){
@@ -33,11 +33,11 @@ public class Result {
 		this.message = message;
 	}
 	
-	public void setCNFProbability(String probability){
+	public void setCNFProbability(float probability){
 		cnfProbability = probability;
 	}
 	
-	public void setRACProbability(String probability){
+	public void setRACProbability(float probability){
 		racProbability = probability;
 	}
 	
