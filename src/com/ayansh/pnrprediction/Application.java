@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.Properties;
 
 import com.ayansh.pnrprediction.exception.ClassNotSupportedException;
+import com.ayansh.pnrprediction.exception.InvalidTrainNoException;
 import com.ayansh.pnrprediction.exception.UnKnownDBError;
 
 
@@ -53,7 +54,18 @@ public class Application {
 		
 		// Set up DB Connection
 		db = new MySQLDB("jdbc:mysql://" + properties.getProperty("mysql_server"));
-		db.setUpConnection();
+		
+		String user, pwd;
+		
+		user = properties.getProperty("db_user");
+		pwd = properties.getProperty("pwd");
+		
+		if(user == null || user.contentEquals("")){
+			user = "admin_GUser";
+			pwd = "PaHxvQ0TJC2L";
+		}
+		
+		db.setUpConnection(user,pwd);
 		
 	}
 	
@@ -72,8 +84,11 @@ public class Application {
 	
 	public Result calculateProbability(String trainNo, String travelDate,
 			String travelClass, String currentStatus) throws SQLException,
-			ClassNotSupportedException, UnKnownDBError, ParseException {
+			ClassNotSupportedException, UnKnownDBError, ParseException, InvalidTrainNoException {
 
+		// Validate Train Number
+		db.validateTrainNo(trainNo);
+		
 		// Get RAC Quota
 		int racQuota = db.getRACQuota(trainNo, travelClass);
 		

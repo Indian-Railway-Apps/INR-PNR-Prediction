@@ -48,7 +48,7 @@ public class MySQLDBTest {
 	public void setUp() throws Exception {
 		
 		db = new MySQLDB("jdbc:mysql://localhost/INR");
-		db.setUpConnection();
+		db.setUpConnection("root","");
 
 	}
 

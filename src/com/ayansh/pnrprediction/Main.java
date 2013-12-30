@@ -8,6 +8,7 @@ import java.sql.SQLException;
 import java.text.ParseException;
 
 import com.ayansh.pnrprediction.exception.ClassNotSupportedException;
+import com.ayansh.pnrprediction.exception.InvalidTrainNoException;
 import com.ayansh.pnrprediction.exception.UnKnownDBError;
 
 
@@ -63,7 +64,7 @@ public class Main {
 			
 			app.calculateProbability(trainNo, travelDate, travelClass, currentStatus);
 			
-		} catch (SQLException | ClassNotSupportedException | UnKnownDBError | ParseException e) {
+		} catch (SQLException | ClassNotSupportedException | UnKnownDBError | ParseException | InvalidTrainNoException e) {
 			
 			app.getResultObject().setResultCode(99);
 			app.getResultObject().setMessage(e.getMessage());

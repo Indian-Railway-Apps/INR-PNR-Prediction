@@ -19,6 +19,7 @@ import org.junit.Test;
 import com.ayansh.pnrprediction.Application;
 import com.ayansh.pnrprediction.Result;
 import com.ayansh.pnrprediction.exception.ClassNotSupportedException;
+import com.ayansh.pnrprediction.exception.InvalidTrainNoException;
 import com.ayansh.pnrprediction.exception.UnKnownDBError;
 
 /**
@@ -84,6 +85,18 @@ public class ApplicationTest {
 		}
 	}
 
+	@Test
+	public void TrainNotSupportedException() {
+		
+		try {
+			Application.getInstance().calculateProbability("XXXXX", "", "1A", "");
+			fail();
+		} catch (InvalidTrainNoException e) {
+		} catch (Exception e) {
+			fail();
+		}
+	}
+	
 	/**
 	 * Test method for {@link com.ayansh.pnrprediction.Application#calculateProbability(java.lang.String, java.lang.String, java.lang.String, java.lang.String)}.
 	 */
@@ -105,7 +118,7 @@ public class ApplicationTest {
 			
 		} catch (SQLException
 				| com.ayansh.pnrprediction.exception.ClassNotSupportedException
-				| UnKnownDBError | ParseException e) {
+				| UnKnownDBError | ParseException | InvalidTrainNoException e) {
 			
 			fail("Exception occured: " + e.getMessage());
 			

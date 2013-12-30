@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import com.ayansh.pnrprediction.exception.ClassNotSupportedException;
+import com.ayansh.pnrprediction.exception.InvalidTrainNoException;
 import com.ayansh.pnrprediction.exception.UnKnownDBError;
 
 public class MySQLDB implements DBServer {
@@ -19,9 +20,9 @@ public class MySQLDB implements DBServer {
 	}
 	
 	@Override
-	public void setUpConnection() throws SQLException {
+	public void setUpConnection(String user, String pwd) throws SQLException {
 		
-		mySQL = DriverManager.getConnection(dbURL, "admin_GUser","PaHxvQ0TJC2L");
+		mySQL = DriverManager.getConnection(dbURL, user, pwd);
 		
 	}
 
@@ -112,6 +113,28 @@ public class MySQLDB implements DBServer {
 		
 		result.beforeFirst();	// Because we called next!
 		return result;
+	}
+
+	@Override
+	public void validateTrainNo(String trainNo) throws SQLException, InvalidTrainNoException {
+		
+		Statement stmt = mySQL.createStatement();
+		
+		String sql = "SELECT * FROM ValidTrains where TrainNo = '" + trainNo + "'";
+
+		ResultSet result = stmt.executeQuery(sql);
+		
+		if(result.next()){
+			// OK Validated
+			result.close();
+			return;
+		}
+		else{
+			// We are not tracking this train number.
+			result.close();
+			throw new InvalidTrainNoException(trainNo);
+		}
+		
 	}
 
 }
