@@ -68,9 +68,9 @@ public class MySQLDBTest {
 		
 		try {
 			
-			assertEquals("3A For known train", 12, db.getRACQuota("12627", "3A"));
-			assertEquals("SL For known train", 60, db.getRACQuota("12627", "SL"));
-			assertEquals("3A for unknown train", 17, db.getRACQuota("1234", "3A"));
+			assertEquals("3A For known train", 12, db.getRACQuota("12627", "3A", "SBC", "NDLS"));
+			assertEquals("SL For known train", 60, db.getRACQuota("12627", "SL", "SBC", "NDLS"));
+			assertEquals("3A for unknown train", 12, db.getRACQuota("1234", "3A", "SBC", "NDLS"));
 			
 		} catch (SQLException | ClassNotSupportedException | UnKnownDBError e) {
 			fail("Exception occured" + e.getMessage());
@@ -82,7 +82,7 @@ public class MySQLDBTest {
 	public void ClassNotSupportedException() {
 		
 		try {
-			db.getRACQuota("12627", "1A");
+			db.getRACQuota("12627", "1A", "SBC", "NDLS");
 			fail();
 		} catch (ClassNotSupportedException e) {
 		} catch (Exception e) {
@@ -90,7 +90,7 @@ public class MySQLDBTest {
 		}
 		
 		try {
-			db.getRACQuota("12627", "2A");
+			db.getRACQuota("12627", "2A", "SBC", "NDLS");
 			fail();
 		} catch (ClassNotSupportedException e) {
 		} catch (Exception e) {

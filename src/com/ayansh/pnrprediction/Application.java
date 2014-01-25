@@ -11,7 +11,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Properties;
 
+import org.json.JSONObject;
+
 import com.ayansh.pnrprediction.exception.ClassNotSupportedException;
+import com.ayansh.pnrprediction.exception.InvalidStationCodesException;
 import com.ayansh.pnrprediction.exception.InvalidTrainNoException;
 import com.ayansh.pnrprediction.exception.UnKnownDBError;
 
@@ -82,15 +85,24 @@ public class Application {
 		}
 	}
 	
-	public Result calculateProbability(String trainNo, String travelDate,
-			String travelClass, String currentStatus) throws SQLException,
-			ClassNotSupportedException, UnKnownDBError, ParseException, InvalidTrainNoException {
-
+	public Result calculateProbability(JSONObject input) throws SQLException,
+			ClassNotSupportedException, UnKnownDBError, ParseException, InvalidTrainNoException, InvalidStationCodesException {
+		
+		String trainNo = input.getString("TrainNo");
+		String travelDate = input.getString("TravelDate");
+		String travelClass = input.getString("TravelClass");
+		String currentStatus = input.getString("CurrentStatus");
+		String fromStation = input.getString("FromStation");
+		String toStation = input.getString("ToStation");
+		
 		// Validate Train Number
 		db.validateTrainNo(trainNo);
 		
+		// Validate Station Codes
+		db.validateStationCodes(trainNo, fromStation, toStation);
+		
 		// Get RAC Quota
-		int racQuota = db.getRACQuota(trainNo, travelClass);
+		int racQuota = db.getRACQuota(trainNo, travelClass, fromStation, toStation);
 		
 		// Calculate Current Deficit.
 		int cnfDeficit = 0, racDeficit = 0;

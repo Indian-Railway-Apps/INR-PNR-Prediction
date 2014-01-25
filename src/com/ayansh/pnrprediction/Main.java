@@ -7,7 +7,11 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.text.ParseException;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.ayansh.pnrprediction.exception.ClassNotSupportedException;
+import com.ayansh.pnrprediction.exception.InvalidStationCodesException;
 import com.ayansh.pnrprediction.exception.InvalidTrainNoException;
 import com.ayansh.pnrprediction.exception.UnKnownDBError;
 
@@ -47,24 +51,55 @@ public class Main {
 			finish();
 		}
 		
-		if (args.length != 4) {
+		if (args.length != 1) {
 			// Wrong Input !!
 			app.getResultObject().setResultCode(3);
 			app.getResultObject().setMessage("Wrong Input !");
 			finish();
 		}
 		
-		// Input seems to be correct. so we can calculate probability
-		String trainNo = args[0];
-		String travelDate = args[1];
-		String travelClass = args[2];
-		String currentStatus = args[3];
+		JSONObject input = new JSONObject();
+		String trainNo = null, travelDate = null;
+		String travelClass = null, currentStatus = null;
+		String fromStation = null, toStation = null;
 		
+		try{
+			
+			// Parse the JSON Input
+			input = new JSONObject(args[0]);
+			
+			trainNo = input.getString("TrainNo");
+			travelDate = input.getString("TravelDate");
+			travelClass = input.getString("TravelClass");
+			currentStatus = input.getString("CurrentStatus");
+			fromStation = input.getString("FromStation");
+			toStation = input.getString("ToStation");
+			
+		}catch (JSONException e){
+			
+			// Wrong Input !!
+			app.getResultObject().setResultCode(3);
+			app.getResultObject().setMessage("Wrong Input !");
+			finish();
+		}
+		
+		// Validate if we have the required input
+		if (trainNo == null || travelDate == null || travelClass == null
+				|| currentStatus == null || fromStation == null
+				|| toStation == null) {
+
+			// Wrong Input !!
+			app.getResultObject().setResultCode(3);
+			app.getResultObject().setMessage("Wrong Input !");
+			finish();
+		}
+
+		// Input seems to be correct. so we can calculate probability
 		try {
 			
-			app.calculateProbability(trainNo, travelDate, travelClass, currentStatus);
+			app.calculateProbability(input);
 			
-		} catch (SQLException | ClassNotSupportedException | UnKnownDBError | ParseException | InvalidTrainNoException e) {
+		} catch (SQLException | ClassNotSupportedException | UnKnownDBError | ParseException | InvalidTrainNoException | InvalidStationCodesException e) {
 			
 			app.getResultObject().setResultCode(99);
 			app.getResultObject().setMessage(e.getMessage());

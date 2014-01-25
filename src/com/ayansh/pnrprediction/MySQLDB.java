@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import com.ayansh.pnrprediction.exception.ClassNotSupportedException;
+import com.ayansh.pnrprediction.exception.InvalidStationCodesException;
 import com.ayansh.pnrprediction.exception.InvalidTrainNoException;
 import com.ayansh.pnrprediction.exception.UnKnownDBError;
 
@@ -35,7 +36,7 @@ public class MySQLDB implements DBServer {
 	}
 
 	@Override
-	public int getRACQuota(String trainNo, String travelClass)
+	public int getRACQuota(String trainNo, String travelClass, String fromStation, String toStation)
 			throws SQLException, ClassNotSupportedException, UnKnownDBError {
 
 		int racQuota = 0;
@@ -62,8 +63,17 @@ public class MySQLDB implements DBServer {
 			// Looks like we are not tracking this train !!
 			app.getResultObject().addMessageToLog("We are not tracking this train. We can only calculate approx.");
 			
-			sql = "SELECT sum(RACQuota) / count(*) FROM TrainQuota where Class = '" + travelClass + "'";
-
+			// Find list of other trains that run b/w the given stations
+			String trainList = getTrainsBetweenStations(fromStation, toStation);
+			
+			if(trainList.contentEquals("*")){
+				sql = "SELECT sum(RACQuota) / count(*) FROM TrainQuota where Class = '" + travelClass + "'";
+			}
+			else{
+				sql = "SELECT sum(RACQuota) / count(*) FROM TrainQuota where Class = '" + travelClass + "' "
+						+ "and TrainNo IN (" + trainList + ")";
+			}
+			
 			result = stmt.executeQuery(sql);
 			
 			if(result.next()){
@@ -76,6 +86,34 @@ public class MySQLDB implements DBServer {
 		
 		result.close();
 		return racQuota;
+	}
+	
+	@Override
+	public String getTrainsBetweenStations(String fromStation, String toStation) throws SQLException {
+		
+		Statement stmt = mySQL.createStatement();
+		
+		String sql = "Select a.TrainNo from TrainStops as a inner join TrainStops as b "
+				+ "on a.TrainNo = b.TrainNo where a.StationCode = '" + fromStation + "' and "
+						+ "b.StationCode = '" + toStation + "' and a.StopNo < b.StopNo";
+		
+		ResultSet result = stmt.executeQuery(sql);
+		
+		if(result.next()){
+			
+			String trainList = "'" + result.getString(1) + "'";
+			
+			while(result.next()){
+				trainList = trainList + ",'" + result.getString(1) + "'";
+			}
+			
+			result.close();
+			return trainList;
+		}
+		else{
+			// We are not tracking any train on this route
+			return "*";
+		}
 	}
 
 	@Override
@@ -135,6 +173,32 @@ public class MySQLDB implements DBServer {
 			throw new InvalidTrainNoException(trainNo);
 		}
 		
+	}
+
+	@Override
+	public void validateStationCodes(String trainNo, String fromStation,
+			String toStation) throws SQLException, InvalidStationCodesException {
+		
+		// Check that this train runs from given from-station to to-station
+		String sql = "select a.* from TrainStops as a inner join TrainStops as b "
+				+ "on a.TrainNo = b.TrainNo where a.TrainNo = '" + trainNo + 
+				"' and a.StationCode = '" + fromStation + "' and "
+						+ "b.StationCode = '" + toStation + "' and a.StopNo < b.StopNo";
+		
+		Statement stmt = mySQL.createStatement();
+		
+		ResultSet result = stmt.executeQuery(sql);
+		
+		if(result.next()){
+			// OK Validated
+			result.close();
+			return;
+		}
+		else{
+			// We are not tracking this train number.
+			result.close();
+			throw new InvalidStationCodesException(trainNo, fromStation, toStation);
+		}
 	}
 
 }
