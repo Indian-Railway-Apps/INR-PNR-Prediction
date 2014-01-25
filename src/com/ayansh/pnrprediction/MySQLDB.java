@@ -6,6 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.json.JSONObject;
+
 import com.ayansh.pnrprediction.exception.ClassNotSupportedException;
 import com.ayansh.pnrprediction.exception.InvalidStationCodesException;
 import com.ayansh.pnrprediction.exception.InvalidTrainNoException;
@@ -199,6 +201,40 @@ public class MySQLDB implements DBServer {
 			result.close();
 			throw new InvalidStationCodesException(trainNo, fromStation, toStation);
 		}
+	}
+
+	@Override
+	public void saveQueryHistory(JSONObject input, Result result) throws SQLException {
+		
+		String pnr = input.getString("PNR");
+		String trainNo = input.getString("TrainNo");
+		String travelDate = input.getString("TravelDate");
+		String travelClass = input.getString("TravelClass");
+		String currentStatus = input.getString("CurrentStatus");
+		String fromStation = input.getString("FromStation");
+		String toStation = input.getString("ToStation");
+		String cnfProb = result.getCNFProbability();
+		String racProb = result.getRACProbability();
+		
+		Statement st = (Statement) mySQL.createStatement();
+		
+		String sql = "INSERT INTO QueryHistory "
+				+ "(PNR, TrainNo, TravelDate, TravelClass, FromStation, ToStation, "
+				+ "CurrentStatus, CNFPobability, RACProbability) "
+				+ "VALUES ("
+				+ "'" + pnr + "',"
+				+ "'" + trainNo + "',"
+				+ "'" + travelDate + "',"
+				+ "'" + travelClass + "',"
+				+ "'" + fromStation + "',"
+				+ "'" + toStation + "',"
+				+ "'" + currentStatus + "',"
+				+ "'" + cnfProb + "',"
+				+ "'" + racProb + "'"
+				+ ")";
+
+		st.executeUpdate(sql);
+		
 	}
 
 }

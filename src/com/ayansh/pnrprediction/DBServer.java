@@ -3,6 +3,8 @@ package com.ayansh.pnrprediction;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.json.JSONObject;
+
 import com.ayansh.pnrprediction.exception.ClassNotSupportedException;
 import com.ayansh.pnrprediction.exception.InvalidStationCodesException;
 import com.ayansh.pnrprediction.exception.InvalidTrainNoException;
@@ -26,4 +28,6 @@ public interface DBServer {
 			String toStation) throws SQLException, InvalidStationCodesException;
 	
 	public String getTrainsBetweenStations(String fromStation, String toStation) throws SQLException;
+
+	public void saveQueryHistory(JSONObject input, Result result) throws SQLException;
 }

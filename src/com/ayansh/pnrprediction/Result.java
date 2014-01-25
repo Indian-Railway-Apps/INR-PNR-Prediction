@@ -37,6 +37,14 @@ public class Result {
 		cnfProbability = probability;
 	}
 	
+	public String getCNFProbability(){
+		return String.valueOf(cnfProbability);
+	}
+	
+	public String getRACProbability(){
+		return String.valueOf(racProbability);
+	}
+	
 	public void setRACProbability(float probability){
 		racProbability = probability;
 	}

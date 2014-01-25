@@ -164,6 +164,14 @@ public class Application {
 		result.setMessage("Probability Calculated Successfully");
 		result.setResultCode(0);
 		
+		// After successful calculation, save into Query History
+		try{
+			db.saveQueryHistory(input,result);
+		}catch(Exception e){
+			// Its OK !
+			result.addMessageToLog("We could not save into query history");
+		}
+		
 		return result;
 
 	}
