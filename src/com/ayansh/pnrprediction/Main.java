@@ -26,7 +26,7 @@ public class Main {
 	 * @param args
 	 */	
 	public static void main(String[] args) {
-
+		
 		// Create Application Instance
 		Application app = Application.getInstance();
 		
@@ -54,7 +54,7 @@ public class Main {
 		if (args.length != 1) {
 			// Wrong Input !!
 			app.getResultObject().setResultCode(3);
-			app.getResultObject().setMessage("Wrong Input !");
+			app.getResultObject().setMessage("Wrong arguments !");
 			finish();
 		}
 		
@@ -78,8 +78,8 @@ public class Main {
 		}catch (JSONException e){
 			
 			// Wrong Input !!
-			app.getResultObject().setResultCode(3);
-			app.getResultObject().setMessage("Wrong Input !");
+			app.getResultObject().setResultCode(4);
+			app.getResultObject().setMessage("Bad JSON !");
 			finish();
 		}
 		
@@ -89,8 +89,8 @@ public class Main {
 				|| toStation == null) {
 
 			// Wrong Input !!
-			app.getResultObject().setResultCode(3);
-			app.getResultObject().setMessage("Wrong Input !");
+			app.getResultObject().setResultCode(5);
+			app.getResultObject().setMessage("Mandatory fields not populated !");
 			finish();
 		}
 
