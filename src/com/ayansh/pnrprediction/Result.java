@@ -19,6 +19,7 @@ public class Result {
 	private String message;
 	private int resultCode;
 	private float cnfProbability, racProbability;
+	private float optimisticCNFProb, optimisticRACProb;
 	private List<String> log;
 	
 	public Result(){
@@ -49,6 +50,22 @@ public class Result {
 		racProbability = probability;
 	}
 	
+	public float getOptimisticCNFProb() {
+		return optimisticCNFProb;
+	}
+
+	public void setOptimisticCNFProb(float optimisticCNFPRob) {
+		this.optimisticCNFProb = optimisticCNFPRob;
+	}
+
+	public float getOptimisticRACProb() {
+		return optimisticRACProb;
+	}
+
+	public void setOptimisticRACProb(float optimisticRACProb) {
+		this.optimisticRACProb = optimisticRACProb;
+	}
+
 	public void addMessageToLog(String message){
 		log.add(message);
 	}
@@ -60,6 +77,8 @@ public class Result {
 		result.put("ResultCode", resultCode);
 		result.put("CNFProbability", cnfProbability);
 		result.put("RACProbability", racProbability);
+		result.put("OptimisticCNFProbability", optimisticCNFProb);
+		result.put("OptimisticRACProbability", optimisticRACProb);
 		result.put("Message", message);
 		
 		JSONArray logMessage = new JSONArray();

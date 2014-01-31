@@ -38,10 +38,12 @@ public class MySQLDB implements DBServer {
 	}
 
 	@Override
-	public int getRACQuota(String trainNo, String travelClass, String fromStation, String toStation)
+	public TrainQuota getQuota(String trainNo, String travelClass, String fromStation, String toStation)
 			throws SQLException, ClassNotSupportedException, UnKnownDBError {
 
-		int racQuota = 0;
+		TrainQuota quotaInfo = new TrainQuota();
+		
+		quotaInfo.setTravelClass(travelClass);
 		
 		if (travelClass.contentEquals("3A") || travelClass.contentEquals("SL")) {
 			// If the Class of travel is 3A or SL then we are good...
@@ -53,13 +55,14 @@ public class MySQLDB implements DBServer {
 		
 		Statement stmt = mySQL.createStatement();
 		
-		String sql = "SELECT RACQuota FROM TrainQuota where TrainNo = '"
+		String sql = "SELECT RACQuota, EQ FROM TrainQuota where TrainNo = '"
 				+ trainNo + "' and Class = '" + travelClass + "'";
 
 		ResultSet result = stmt.executeQuery(sql);
 		
 		if(result.next()){
-			racQuota = result.getInt(1);
+			quotaInfo.setRacQuota(result.getInt(1));
+			quotaInfo.setEmergencyQuota(result.getInt(2));
 		}
 		else{
 			// Looks like we are not tracking this train !!
@@ -69,17 +72,20 @@ public class MySQLDB implements DBServer {
 			String trainList = getTrainsBetweenStations(fromStation, toStation);
 			
 			if(trainList.contentEquals("*")){
-				sql = "SELECT sum(RACQuota) / count(*) FROM TrainQuota where Class = '" + travelClass + "'";
+				sql = "SELECT (sum(RACQuota) / count(*)) as RacQuota, (sum(EQ) / count(*)) as EQ " +
+						"FROM TrainQuota where Class = '" + travelClass + "'";
 			}
 			else{
-				sql = "SELECT sum(RACQuota) / count(*) FROM TrainQuota where Class = '" + travelClass + "' "
+				sql = "SELECT (sum(RACQuota) / count(*)) as RacQuota, (sum(EQ) / count(*)) as EQ " +
+						"FROM TrainQuota where Class = '" + travelClass + "' "
 						+ "and TrainNo IN (" + trainList + ")";
 			}
 			
 			result = stmt.executeQuery(sql);
 			
 			if(result.next()){
-				racQuota = result.getInt(1);
+				quotaInfo.setRacQuota(result.getInt(1));
+				quotaInfo.setEmergencyQuota(result.getInt(2));
 			}
 			else{
 				throw new UnKnownDBError();
@@ -87,7 +93,8 @@ public class MySQLDB implements DBServer {
 		}
 		
 		result.close();
-		return racQuota;
+		
+		return quotaInfo;
 	}
 	
 	@Override
@@ -127,7 +134,7 @@ public class MySQLDB implements DBServer {
 				+ "from (select distinct TrainNo, Class, TravelDate from AvailabilityInfo where "
 				+ "TrainNo = '" + trainNo + "' and Class = '" + travelClass + "') as t "
 				+ "inner join AvailabilityInfo as l on t.TrainNo = l.TrainNo and t.Class = l.class "
-				+ "and t.TravelDate = l.TravelDate and l.LookupDate >= (t.TravelDate - " + dayDiff + ") "
+				+ "and t.TravelDate = l.TravelDate and l.LookupDate >= date_sub(t.TravelDate, interval " + dayDiff + " day) "
 				+ "and l.LookupDate < t.TravelDate where t.TrainNo = '" + trainNo + "' "
 				+ "and t.Class = '" + travelClass + "' group by t.TrainNo, t.Class, t.TravelDate";
 
@@ -136,13 +143,30 @@ public class MySQLDB implements DBServer {
 		if(!result.next()){
 			// We did not find anything !!
 			
-			sql = "select t.TrainNo, t.Class, t.TravelDate, sum(l.Cancellations) as Cancellations "
-					+ "from (select distinct TrainNo, Class, TravelDate from AvailabilityInfo where "
-					+ "Class = '" + travelClass + "') as t " 
-					+ "inner join AvailabilityInfo as l on t.TrainNo = l.TrainNo and t.Class = l.class "
-					+ "and t.TravelDate = l.TravelDate and l.LookupDate >= (t.TravelDate - "
-					+ dayDiff + ") " + "and l.LookupDate < t.TravelDate where t.Class = '" 
-					+ travelClass + "' group by t.TrainNo, t.Class, t.TravelDate";
+			// Find list of other trains that run b/w the given stations
+			String trainList = getTrainsBetweenStations("", "");
+
+			if (trainList.contentEquals("*")) {
+				// Of all Trains
+				sql = "select t.TrainNo, t.Class, t.TravelDate, sum(l.Cancellations) as Cancellations "
+						+ "from (select distinct TrainNo, Class, TravelDate from AvailabilityInfo where "
+						+ "Class = '" + travelClass + "') as t " 
+						+ "inner join AvailabilityInfo as l on t.TrainNo = l.TrainNo and t.Class = l.class "
+						+ "and t.TravelDate = l.TravelDate and l.LookupDate >= date_sub(t.TravelDate, interval " + dayDiff + " day) " 
+						+ "and l.LookupDate < t.TravelDate where t.Class = '" 
+						+ travelClass + "' group by t.TrainNo, t.Class, t.TravelDate";
+				
+			} else {
+				
+				sql = "select t.TrainNo, t.Class, t.TravelDate, sum(l.Cancellations) as Cancellations "
+						+ "from ( select distinct TrainNo, Class, TravelDate from AvailabilityInfo where "
+						+ "TrainNo in (" + trainList + "') and Class = '3A') as t "
+						+ "inner join AvailabilityInfo as l on t.TrainNo = l.TrainNo and t.Class = l.class "
+						+ "and t.TravelDate = l.TravelDate and l.LookupDate >= date_sub(t.TravelDate, interval " + dayDiff + " day) "
+						+ "and l.LookupDate < t.TravelDate where t.TrainNo in (" + trainList + ") "
+						+ "and t.Class = '3A' group by t.TrainNo, t.Class, t.TravelDate";
+				
+			}
 			
 			result = stmt.executeQuery(sql);
 			

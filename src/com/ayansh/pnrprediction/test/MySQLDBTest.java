@@ -48,7 +48,7 @@ public class MySQLDBTest {
 	public void setUp() throws Exception {
 		
 		db = new MySQLDB("jdbc:mysql://localhost/INR");
-		db.setUpConnection("root","");
+		db.setUpConnection("root","mastram");
 
 	}
 
@@ -64,13 +64,19 @@ public class MySQLDBTest {
 	 * Test method for {@link com.ayansh.pnrprediction.MySQLDB#getRACQuota(java.lang.String, java.lang.String)}.
 	 */
 	@Test
-	public final void testGetRACQuota() {
+	public final void testGetQuota() {
 		
 		try {
 			
-			assertEquals("3A For known train", 12, db.getRACQuota("12627", "3A", "SBC", "NDLS"));
-			assertEquals("SL For known train", 60, db.getRACQuota("12627", "SL", "SBC", "NDLS"));
-			assertEquals("3A for unknown train", 12, db.getRACQuota("1234", "3A", "SBC", "NDLS"));
+			// Test RAC Quota
+			assertEquals("3A For known train", 12, db.getQuota("12627", "3A", "SBC", "NDLS").getRacQuota());
+			assertEquals("SL For known train", 60, db.getQuota("12627", "SL", "SBC", "NDLS").getRacQuota());
+			assertEquals("3A for unknown train", 12, db.getQuota("1234", "3A", "SBC", "NDLS").getRacQuota());
+			
+			// Test EQ Quota
+			assertEquals("3A For known train", 6, db.getQuota("12627", "3A", "SBC", "NDLS").getEmergencyQuota());
+			assertEquals("SL For known train", 20, db.getQuota("12627", "SL", "SBC", "NDLS").getEmergencyQuota());
+			assertEquals("3A for unknown train", 6, db.getQuota("1234", "3A", "SBC", "NDLS").getEmergencyQuota());
 			
 		} catch (SQLException | ClassNotSupportedException | UnKnownDBError e) {
 			fail("Exception occured" + e.getMessage());
@@ -82,7 +88,7 @@ public class MySQLDBTest {
 	public void ClassNotSupportedException() {
 		
 		try {
-			db.getRACQuota("12627", "1A", "SBC", "NDLS");
+			db.getQuota("12627", "1A", "SBC", "NDLS");
 			fail();
 		} catch (ClassNotSupportedException e) {
 		} catch (Exception e) {
@@ -90,7 +96,7 @@ public class MySQLDBTest {
 		}
 		
 		try {
-			db.getRACQuota("12627", "2A", "SBC", "NDLS");
+			db.getQuota("12627", "2A", "SBC", "NDLS");
 			fail();
 		} catch (ClassNotSupportedException e) {
 		} catch (Exception e) {

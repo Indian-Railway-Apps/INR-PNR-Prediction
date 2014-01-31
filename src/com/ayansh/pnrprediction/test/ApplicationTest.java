@@ -75,7 +75,7 @@ public class ApplicationTest {
 			input = new JSONObject();
 			
 			input.put("TrainNo", "12627");
-			input.put("TravelDate", "10-10-2014");
+			input.put("TravelDate", "30-03-2014");
 			input.put("CurrentStatus", "GNWL30/WL10");
 			input.put("FromStation", "SBC");
 			input.put("ToStation", "NDLS");
@@ -91,7 +91,7 @@ public class ApplicationTest {
 			input = new JSONObject();
 			
 			input.put("TrainNo", "12627");
-			input.put("TravelDate", "10-10-2014");
+			input.put("TravelDate", "30-03-2014");
 			input.put("TravelClass", "2A");
 			input.put("CurrentStatus", "GNWL30/WL10");
 			input.put("FromStation", "SBC");
@@ -110,7 +110,7 @@ public class ApplicationTest {
 		try {
 			input = new JSONObject();
 			
-			input.put("TravelDate", "10-10-2014");
+			input.put("TravelDate", "30-03-2014");
 			input.put("TravelClass", "3A");
 			input.put("CurrentStatus", "GNWL30/WL10");
 			input.put("FromStation", "SBC");
@@ -129,7 +129,7 @@ public class ApplicationTest {
 		
 		input = new JSONObject();
 		
-		input.put("TravelDate", "10-10-2014");
+		input.put("TravelDate", "30-03-2014");
 		input.put("TravelClass", "3A");
 		input.put("CurrentStatus", "GNWL30/WL10");
 		input.put("FromStation", "XXX");
@@ -170,20 +170,76 @@ public class ApplicationTest {
 			input = new JSONObject();
 			
 			input.put("TrainNo", "12627");
-			input.put("TravelDate", "10-10-2014");
+			input.put("TravelDate", "30-03-2014");
 			input.put("TravelClass", "3A");
 			input.put("CurrentStatus", "GNWL30/WL10");
 			input.put("FromStation", "SBC");
 			input.put("ToStation", "NDLS");
 			
+			// Check if execution was success
 			result = Application.getInstance().calculateProbability(input);
 			r = new JSONObject(result.JSONify());
 			assertEquals("Calculate Prob Test", 0, r.getInt("ResultCode"));
 			
+			// Check if execution was success
 			input.put("TravelClass", "SL");
 			result = Application.getInstance().calculateProbability(input);
 			r = new JSONObject(result.JSONify());
 			assertEquals("Calculate Prob Test", 0, r.getInt("ResultCode"));
+			
+			// Check if Optimistic Prob was calculated
+			float optProb = result.getOptimisticCNFProb();
+			if(optProb <= 0){
+				fail();
+			}
+			
+			optProb = result.getOptimisticRACProb();
+			if(optProb <= 0){
+				fail();
+			}
+			
+		} catch (SQLException
+				| com.ayansh.pnrprediction.exception.ClassNotSupportedException
+				| UnKnownDBError | ParseException | InvalidTrainNoException | InvalidStationCodesException e) {
+			
+			fail("Exception occured: " + e.getMessage());
+			
+		}
+		
+	}
+	
+	@Test
+	public final void testCalculateProbabilityUnTrackedTrain() {
+		
+		try {
+			
+			Result result;
+			JSONObject r;
+			
+			input = new JSONObject();
+			
+			input.put("TrainNo", "12249");
+			input.put("TravelDate", "30-03-2014");
+			input.put("TravelClass", "3A");
+			input.put("CurrentStatus", "GNWL30/WL10");
+			input.put("FromStation", "HWH");
+			input.put("ToStation", "NDLS");
+			
+			// Check if execution was success
+			result = Application.getInstance().calculateProbability(input);
+			r = new JSONObject(result.JSONify());
+			assertEquals("Calculate Prob Test", 0, r.getInt("ResultCode"));
+			
+			// Check if Optimistic Prob was calculated
+			float optProb = result.getOptimisticCNFProb();
+			if(optProb <= 0){
+				fail();
+			}
+			
+			optProb = result.getOptimisticRACProb();
+			if(optProb <= 0){
+				fail();
+			}
 			
 		} catch (SQLException
 				| com.ayansh.pnrprediction.exception.ClassNotSupportedException

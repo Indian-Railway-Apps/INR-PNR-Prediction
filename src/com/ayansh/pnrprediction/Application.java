@@ -101,8 +101,11 @@ public class Application {
 		// Validate Station Codes
 		db.validateStationCodes(trainNo, fromStation, toStation);
 		
-		// Get RAC Quota
-		int racQuota = db.getRACQuota(trainNo, travelClass, fromStation, toStation);
+		// Get Quota
+		TrainQuota quotaInfo = db.getQuota(trainNo, travelClass, fromStation, toStation);
+		
+		int racQuota = quotaInfo.getRacQuota();
+		int eq = quotaInfo.getEmergencyQuota();
 		
 		// Calculate Current Deficit.
 		int cnfDeficit = 0, racDeficit = 0;
@@ -138,19 +141,31 @@ public class Application {
 		Date trDate = sdf.parse(travelDate);
 		
 		int dayDiff = (int) ((trDate.getTime() - today.getTime())/(1000*60*60*24));
+		
 		int calcellations, cnfCount = 0, racCount = 0, total = 0;
+		int optCNFCount = 0, optRACCount = 0;
 		
 		ResultSet resultSet = db.getAvailabilityHistory(trainNo, travelClass, dayDiff);
 		while(resultSet.next()){
 			
 			calcellations = resultSet.getInt(4);
 			
+			// Pessimistic Calculations
 			if(calcellations >= cnfDeficit){
 				cnfCount++;
 			}
 			
 			if(calcellations >= racDeficit){
 				racCount++;
+			}
+			
+			// Optimistic Calculations
+			if(calcellations + eq >= cnfDeficit){
+				optCNFCount++;
+			}
+			
+			if(calcellations + eq >= racDeficit){
+				optRACCount++;
 			}
 			
 			total++;
@@ -161,6 +176,8 @@ public class Application {
 		// Calculate Probability
 		result.setCNFProbability(100 * cnfCount / total);
 		result.setRACProbability(100 * racCount / total);
+		result.setOptimisticCNFProb(100 * optCNFCount / total);
+		result.setOptimisticRACProb(100 * optRACCount / total);
 		result.setMessage("Probability Calculated Successfully");
 		result.setResultCode(0);
 		

@@ -16,7 +16,7 @@ public interface DBServer {
 
 	public void close() throws SQLException;
 
-	public int getRACQuota(String trainNo, String travelClass, String fromStation, String toStation)
+	public TrainQuota getQuota(String trainNo, String travelClass, String fromStation, String toStation)
 			throws SQLException, ClassNotSupportedException, UnKnownDBError;
 
 	public ResultSet getAvailabilityHistory(String trainNo, String travelClass,
