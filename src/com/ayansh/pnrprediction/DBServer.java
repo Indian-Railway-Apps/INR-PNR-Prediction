@@ -2,6 +2,7 @@ package com.ayansh.pnrprediction;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
 
 import org.json.JSONObject;
 
@@ -29,5 +30,5 @@ public interface DBServer {
 	
 	public String getTrainsBetweenStations(String fromStation, String toStation) throws SQLException;
 
-	public void saveQueryHistory(JSONObject input, Result result) throws SQLException;
+	public void saveQueryHistory(JSONObject input, Result result) throws SQLException, ParseException;
 }

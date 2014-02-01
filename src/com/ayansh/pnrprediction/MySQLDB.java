@@ -5,6 +5,9 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.json.JSONObject;
 
@@ -228,7 +231,7 @@ public class MySQLDB implements DBServer {
 	}
 
 	@Override
-	public void saveQueryHistory(JSONObject input, Result result) throws SQLException {
+	public void saveQueryHistory(JSONObject input, Result result) throws SQLException, ParseException {
 		
 		String pnr = input.getString("PNR");
 		String trainNo = input.getString("TrainNo");
@@ -239,6 +242,12 @@ public class MySQLDB implements DBServer {
 		String toStation = input.getString("ToStation");
 		String cnfProb = result.getCNFProbability();
 		String racProb = result.getRACProbability();
+		
+		// Change the Date format from Indian Format to SQL
+		SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+		Date trDate = sdf.parse(travelDate);
+		sdf = new SimpleDateFormat("yyyy-MM-dd");
+		travelDate = sdf.format(trDate);
 		
 		Statement st = (Statement) mySQL.createStatement();
 		
