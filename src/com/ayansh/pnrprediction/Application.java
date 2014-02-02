@@ -142,42 +142,67 @@ public class Application {
 		
 		int dayDiff = (int) ((trDate.getTime() - today.getTime())/(1000*60*60*24));
 		
-		int calcellations, cnfCount = 0, racCount = 0, total = 0;
+		int cancellations, cnfCount = 0, racCount = 0, total = 0, cancSum = 0;
 		int optCNFCount = 0, optRACCount = 0;
 		
 		ResultSet resultSet = db.getAvailabilityHistory(trainNo, travelClass, dayDiff);
 		while(resultSet.next()){
 			
-			calcellations = resultSet.getInt(4);
+			cancellations = resultSet.getInt(4);
+			cancSum += cancellations;
 			
 			// Pessimistic Calculations
-			if(calcellations >= cnfDeficit){
+			if(cancellations >= cnfDeficit){
 				cnfCount++;
 			}
 			
-			if(calcellations >= racDeficit){
+			if(cancellations >= racDeficit){
 				racCount++;
 			}
 			
 			// Optimistic Calculations
-			if(calcellations + eq >= cnfDeficit){
+			if(cancellations + eq >= cnfDeficit){
 				optCNFCount++;
 			}
 			
-			if(calcellations + eq >= racDeficit){
+			if(cancellations + eq >= racDeficit){
 				optRACCount++;
 			}
 			
 			total++;
 		}
-		
+				
 		resultSet.close();
+		
+		int avjCancellations = cancSum / total;
+		int expectedDeficit;
+		String expectedStatus = "";
 		
 		// Calculate Probability
 		result.setCNFProbability(100 * cnfCount / total);
 		result.setRACProbability(100 * racCount / total);
 		result.setOptimisticCNFProb(100 * optCNFCount / total);
 		result.setOptimisticRACProb(100 * optRACCount / total);
+		
+		// Calculate Expected status
+
+		expectedDeficit = cnfDeficit - avjCancellations;
+
+		if (expectedDeficit > 0 && expectedDeficit > racQuota) {
+			// Still waiting :(
+			expectedStatus = "WL" + (expectedDeficit - racQuota);
+		}
+
+		if (expectedDeficit > 0 && expectedDeficit <= racQuota) {
+			// Still RAC :|
+			expectedStatus = "RAC" + (racQuota - expectedDeficit + 1);
+		}
+
+		if (expectedDeficit <= 0) {
+			expectedStatus = "CNF";
+		}
+		
+		result.setExpectedStatus(expectedStatus);
 		result.setMessage("Probability Calculated Successfully");
 		result.setResultCode(0);
 		

@@ -251,4 +251,44 @@ public class ApplicationTest {
 		
 	}
 	
+	@Test
+	public final void testCalculateExpectedStatus() {
+		
+		try {
+			
+			Result result;
+			JSONObject r;
+			
+			input = new JSONObject();
+			
+			input.put("TrainNo", "12627");
+			input.put("TravelDate", "30-03-2014");
+			input.put("TravelClass", "3A");
+			input.put("CurrentStatus", "GNWL30/WL10");
+			input.put("FromStation", "SBC");
+			input.put("ToStation", "NDLS");
+			
+			// Check if execution was success
+			result = Application.getInstance().calculateProbability(input);
+			r = new JSONObject(result.JSONify());
+			assertEquals("Calculate Prob Test", 0, r.getInt("ResultCode"));
+			
+			// Check Expected Status is calculated
+			String expectedStatus = r.getString("ExpectedStatus");
+			
+			if(expectedStatus == null || expectedStatus.contentEquals("")){
+				fail();
+			}
+
+			
+		} catch (SQLException
+				| com.ayansh.pnrprediction.exception.ClassNotSupportedException
+				| UnKnownDBError | ParseException | InvalidTrainNoException | InvalidStationCodesException e) {
+			
+			fail("Exception occured: " + e.getMessage());
+			
+		}
+		
+	}
+	
 }
