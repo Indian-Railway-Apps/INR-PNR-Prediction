@@ -8,6 +8,8 @@ import static org.junit.Assert.fail;
 
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.util.Iterator;
+import java.util.List;
 
 import org.json.JSONObject;
 import org.junit.After;
@@ -278,6 +280,45 @@ public class ApplicationTest {
 			
 			if(expectedStatus == null || expectedStatus.contentEquals("")){
 				fail();
+			}
+
+			
+		} catch (SQLException
+				| com.ayansh.pnrprediction.exception.ClassNotSupportedException
+				| UnKnownDBError | ParseException | InvalidTrainNoException | InvalidStationCodesException e) {
+			
+			fail("Exception occured: " + e.getMessage());
+			
+		}
+		
+	}
+	
+	@Test
+	public final void testSaveQueryHistory() {
+		
+		try {
+			
+			Result result;
+			
+			input = new JSONObject();
+			
+			input.put("PNR", "");
+			input.put("TrainNo", "12627");
+			input.put("TravelDate", "30-03-2014");
+			input.put("TravelClass", "3A");
+			input.put("CurrentStatus", "GNWL30/WL10");
+			input.put("FromStation", "SBC");
+			input.put("ToStation", "NDLS");
+			
+			// Check if execution was success
+			result = Application.getInstance().calculateProbability(input);
+			
+			List<String> log = result.getLog();
+			Iterator<String> i = log.iterator();
+			while(i.hasNext()){
+				if(i.next().contentEquals("We could not save into query history")){
+					fail("We could not save into query history");
+				}
 			}
 
 			

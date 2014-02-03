@@ -253,7 +253,7 @@ public class MySQLDB implements DBServer {
 		
 		String sql = "INSERT INTO QueryHistory "
 				+ "(PNR, TrainNo, TravelDate, TravelClass, FromStation, ToStation, "
-				+ "CurrentStatus, CNFPobability, RACProbability) "
+				+ "CurrentStatus, CNFProbability, RACProbability) "
 				+ "VALUES ("
 				+ "'" + pnr + "',"
 				+ "'" + trainNo + "',"

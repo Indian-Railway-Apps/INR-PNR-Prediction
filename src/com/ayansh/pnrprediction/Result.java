@@ -79,6 +79,10 @@ public class Result {
 		log.add(message);
 	}
 	
+	public List<String> getLog(){
+		return log;
+	}
+	
 	public String JSONify(){
 				
 		JSONObject result = new JSONObject();
