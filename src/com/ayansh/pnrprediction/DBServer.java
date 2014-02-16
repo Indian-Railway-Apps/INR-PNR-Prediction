@@ -28,7 +28,7 @@ public interface DBServer {
 	public void validateStationCodes(String trainNo, String fromStation,
 			String toStation) throws SQLException, InvalidStationCodesException;
 	
-	public String getTrainsBetweenStations(String fromStation, String toStation) throws SQLException;
+	public String getTrackedTrainsBetweenStations(String fromStation, String toStation) throws SQLException;
 
 	public void saveQueryHistory(JSONObject input, Result result) throws SQLException, ParseException;
 }

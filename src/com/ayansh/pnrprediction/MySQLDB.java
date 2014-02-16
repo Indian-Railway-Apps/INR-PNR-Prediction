@@ -72,7 +72,7 @@ public class MySQLDB implements DBServer {
 			app.getResultObject().addMessageToLog("We are not tracking this train. We can only calculate approx.");
 			
 			// Find list of other trains that run b/w the given stations
-			String trainList = getTrainsBetweenStations(fromStation, toStation);
+			String trainList = getTrackedTrainsBetweenStations(fromStation, toStation);
 			
 			if(trainList.contentEquals("*")){
 				sql = "SELECT (sum(RACQuota) / count(*)) as RacQuota, (sum(EQ) / count(*)) as EQ " +
@@ -101,13 +101,14 @@ public class MySQLDB implements DBServer {
 	}
 	
 	@Override
-	public String getTrainsBetweenStations(String fromStation, String toStation) throws SQLException {
+	public String getTrackedTrainsBetweenStations(String fromStation, String toStation) throws SQLException {
 		
 		Statement stmt = mySQL.createStatement();
 		
 		String sql = "Select a.TrainNo from TrainStops as a inner join TrainStops as b "
-				+ "on a.TrainNo = b.TrainNo where a.StationCode = '" + fromStation + "' and "
-						+ "b.StationCode = '" + toStation + "' and a.StopNo < b.StopNo";
+				+ "on a.TrainNo = b.TrainNo inner join TrainInfo as t on a.TrainNo = t.TrainNo "
+				+ "where a.StationCode = '" + fromStation + "' and "
+				+ "b.StationCode = '" + toStation + "' and a.StopNo < b.StopNo";
 		
 		ResultSet result = stmt.executeQuery(sql);
 		
@@ -147,7 +148,7 @@ public class MySQLDB implements DBServer {
 			// We did not find anything !!
 			
 			// Find list of other trains that run b/w the given stations
-			String trainList = getTrainsBetweenStations("", "");
+			String trainList = getTrackedTrainsBetweenStations("", "");
 
 			if (trainList.contentEquals("*")) {
 				// Of all Trains
