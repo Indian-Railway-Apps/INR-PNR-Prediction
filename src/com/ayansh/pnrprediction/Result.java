@@ -51,16 +51,16 @@ public class Result {
 		racProbability = probability;
 	}
 	
-	public float getOptimisticCNFProb() {
-		return optimisticCNFProb;
+	public String getOptimisticCNFProb() {
+		return String.valueOf(optimisticCNFProb);
 	}
 
 	public void setOptimisticCNFProb(float optimisticCNFPRob) {
 		this.optimisticCNFProb = optimisticCNFPRob;
 	}
 
-	public float getOptimisticRACProb() {
-		return optimisticRACProb;
+	public String getOptimisticRACProb() {
+		return String.valueOf(optimisticRACProb);
 	}
 
 	public void setOptimisticRACProb(float optimisticRACProb) {

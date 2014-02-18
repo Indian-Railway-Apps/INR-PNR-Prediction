@@ -190,12 +190,12 @@ public class ApplicationTest {
 			assertEquals("Calculate Prob Test", 0, r.getInt("ResultCode"));
 			
 			// Check if Optimistic Prob was calculated
-			float optProb = result.getOptimisticCNFProb();
+			float optProb = Float.valueOf(result.getOptimisticCNFProb());
 			if(optProb <= 0){
 				fail();
 			}
 			
-			optProb = result.getOptimisticRACProb();
+			optProb = Float.valueOf(result.getOptimisticRACProb());
 			if(optProb <= 0){
 				fail();
 			}
@@ -233,12 +233,12 @@ public class ApplicationTest {
 			assertEquals("Calculate Prob Test", 0, r.getInt("ResultCode"));
 			
 			// Check if Optimistic Prob was calculated
-			float optProb = result.getOptimisticCNFProb();
+			float optProb = Float.valueOf(result.getOptimisticCNFProb());
 			if(optProb <= 0){
 				fail();
 			}
 			
-			optProb = result.getOptimisticRACProb();
+			optProb = Float.valueOf(result.getOptimisticRACProb());
 			if(optProb <= 0){
 				fail();
 			}

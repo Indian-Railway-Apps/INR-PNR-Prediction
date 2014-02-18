@@ -243,6 +243,9 @@ public class MySQLDB implements DBServer {
 		String toStation = input.getString("ToStation");
 		String cnfProb = result.getCNFProbability();
 		String racProb = result.getRACProbability();
+		String optCNFProb = result.getOptimisticCNFProb();
+		String optRACProb = result.getOptimisticRACProb();
+		String expectedStatus = result.getExpectedStatus();
 		
 		// Change the Date format from Indian Format to SQL
 		SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
@@ -253,8 +256,8 @@ public class MySQLDB implements DBServer {
 		Statement st = (Statement) mySQL.createStatement();
 		
 		String sql = "INSERT INTO QueryHistory "
-				+ "(PNR, TrainNo, TravelDate, TravelClass, FromStation, ToStation, "
-				+ "CurrentStatus, CNFProbability, RACProbability) "
+				+ "(PNR, TrainNo, TravelDate, TravelClass, FromStation, ToStation, CurrentStatus, CNFProbability, "
+				+ "RACProbability, OptCNFProbability, OptRACProbability, ExpectedStatus) "
 				+ "VALUES ("
 				+ "'" + pnr + "',"
 				+ "'" + trainNo + "',"
@@ -264,7 +267,10 @@ public class MySQLDB implements DBServer {
 				+ "'" + toStation + "',"
 				+ "'" + currentStatus + "',"
 				+ "'" + cnfProb + "',"
-				+ "'" + racProb + "'"
+				+ "'" + racProb + "',"
+				+ "'" + optCNFProb + "',"
+				+ "'" + optRACProb + "',"
+				+ "'" + expectedStatus + "'"
 				+ ")";
 
 		st.executeUpdate(sql);
