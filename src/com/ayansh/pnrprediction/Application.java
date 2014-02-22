@@ -142,10 +142,14 @@ public class Application {
 		
 		int dayDiff = (int) ((trDate.getTime() - today.getTime())/(1000*60*60*24));
 		
+		// Because we cast to INTEGER, so less that 1 day becomes 0 days!
+		// TODO : Ideally I should take the Hour diff.
+		dayDiff++;
+		
 		int cancellations, cnfCount = 0, racCount = 0, total = 0, cancSum = 0;
 		int optCNFCount = 0, optRACCount = 0;
 		
-		ResultSet resultSet = db.getAvailabilityHistory(trainNo, travelClass, dayDiff);
+		ResultSet resultSet = db.getAvailabilityHistory(trainNo, travelClass, fromStation, toStation, dayDiff);
 		while(resultSet.next()){
 			
 			cancellations = resultSet.getInt(4);

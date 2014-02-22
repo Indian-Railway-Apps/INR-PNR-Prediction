@@ -130,7 +130,7 @@ public class MySQLDB implements DBServer {
 	}
 
 	@Override
-	public ResultSet getAvailabilityHistory(String trainNo, String travelClass, int dayDiff) throws SQLException, UnKnownDBError {
+	public ResultSet getAvailabilityHistory(String trainNo, String travelClass, String fromStation, String toStation, int dayDiff) throws SQLException, UnKnownDBError {
 		
 		Statement stmt = mySQL.createStatement();
 		
@@ -139,7 +139,7 @@ public class MySQLDB implements DBServer {
 				+ "TrainNo = '" + trainNo + "' and Class = '" + travelClass + "') as t "
 				+ "inner join AvailabilityInfo as l on t.TrainNo = l.TrainNo and t.Class = l.class "
 				+ "and t.TravelDate = l.TravelDate and l.LookupDate >= date_sub(t.TravelDate, interval " + dayDiff + " day) "
-				+ "and l.LookupDate < t.TravelDate where t.TrainNo = '" + trainNo + "' "
+				+ "and l.LookupDate < date_add(t.TravelDate, interval 1 day) where t.TrainNo = '" + trainNo + "' "
 				+ "and t.Class = '" + travelClass + "' group by t.TrainNo, t.Class, t.TravelDate";
 
 		ResultSet result = stmt.executeQuery(sql);
@@ -148,7 +148,7 @@ public class MySQLDB implements DBServer {
 			// We did not find anything !!
 			
 			// Find list of other trains that run b/w the given stations
-			String trainList = getTrackedTrainsBetweenStations("", "");
+			String trainList = getTrackedTrainsBetweenStations(fromStation, toStation);
 
 			if (trainList.contentEquals("*")) {
 				// Of all Trains
@@ -157,17 +157,17 @@ public class MySQLDB implements DBServer {
 						+ "Class = '" + travelClass + "') as t " 
 						+ "inner join AvailabilityInfo as l on t.TrainNo = l.TrainNo and t.Class = l.class "
 						+ "and t.TravelDate = l.TravelDate and l.LookupDate >= date_sub(t.TravelDate, interval " + dayDiff + " day) " 
-						+ "and l.LookupDate < t.TravelDate where t.Class = '" 
+						+ "and l.LookupDate < date_add(t.TravelDate, interval 1 day) where t.Class = '" 
 						+ travelClass + "' group by t.TrainNo, t.Class, t.TravelDate";
 				
 			} else {
 				
 				sql = "select t.TrainNo, t.Class, t.TravelDate, sum(l.Cancellations) as Cancellations "
 						+ "from ( select distinct TrainNo, Class, TravelDate from AvailabilityInfo where "
-						+ "TrainNo in (" + trainList + "') and Class = '3A') as t "
+						+ "TrainNo in (" + trainList + ") and Class = '3A') as t "
 						+ "inner join AvailabilityInfo as l on t.TrainNo = l.TrainNo and t.Class = l.class "
 						+ "and t.TravelDate = l.TravelDate and l.LookupDate >= date_sub(t.TravelDate, interval " + dayDiff + " day) "
-						+ "and l.LookupDate < t.TravelDate where t.TrainNo in (" + trainList + ") "
+						+ "and l.LookupDate < date_add(t.TravelDate, interval 1 day) where t.TrainNo in (" + trainList + ") "
 						+ "and t.Class = '3A' group by t.TrainNo, t.Class, t.TravelDate";
 				
 			}

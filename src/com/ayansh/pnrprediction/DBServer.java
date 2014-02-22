@@ -20,7 +20,7 @@ public interface DBServer {
 	public TrainQuota getQuota(String trainNo, String travelClass, String fromStation, String toStation)
 			throws SQLException, ClassNotSupportedException, UnKnownDBError;
 
-	public ResultSet getAvailabilityHistory(String trainNo, String travelClass,
+	public ResultSet getAvailabilityHistory(String trainNo, String travelClass, String fromStation, String toStation, 
 			int dayDiff) throws SQLException, UnKnownDBError;
 
 	public void validateTrainNo(String trainNo) throws SQLException, InvalidTrainNoException;
